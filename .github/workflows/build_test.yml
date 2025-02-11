@@ -1,8 +1,11 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
+
+# name of workflow
 name: Build and Test
 
+# workflow will trigger on these events -> push & pull requests on main branch
 on:
   push:
     branches: [ "main" ]
@@ -11,24 +14,26 @@ on:
 
 jobs:
   build_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    # version of the remote testing machine (runner)
 
+    # optional job parameter adding more functionality & flexibility
     strategy:
-      fail-fast: true
-      matrix:
+      fail-fast: true     # if any job fails, entire workflow fails too
+      matrix:             # creates a matrix of 3 jobs on 3 different runner versions. All of them will run parallel
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - name: Clone repo on remote machine (runner)
+    - name: Clone repo on remote machine (runner)     # step 1. Runner clones repo
       uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js ${{ matrix.node-version }}    # step 2. Installs node.js
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: ${{ matrix.node-version }}      # using versions from line 25
         cache: 'npm'
-    - name: Install project dependencies
+    - name: Install project dependencies              # step 3. Installs dependencies
       run: npm install
-    - name: Start app
+    - name: Start app                                 # Runs (builds) the app
+      # '&' -> app will run in background
       run: npm run start &
-    - name: Run integration tests
+    - name: Run integration tests             # Runs test
       run: npm test

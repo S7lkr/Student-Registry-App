@@ -13,8 +13,28 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # job 1
+  security_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repo on remote machine (runner)
+      uses: actions/checkout@v4
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+    - name: Install project dependencies
+      run: npm install
+    - name: Start app
+      run: npm run start &
+    - name: Run security tests
+      run: npm audit
+
+  # job 2
   build_test:
     runs-on: ubuntu-latest    # version of the remote testing machine (runner)
+    needs: security_tests     # NOTE: 'needs' param will make job2 dependant on job1. Both jobs will run successively
 
     # # optional job parameter adding more functionality & flexibility
     # strategy:
@@ -43,20 +63,4 @@ jobs:
       with:
         name: test-results
         path: test-output.log
-
-  security_tests:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Clone repo on remote machine (runner)
-      uses: actions/checkout@v4
-    - name: Use Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-    - name: Install project dependencies
-      run: npm install
-    - name: Start app
-      run: npm run start &
-    - name: Run security tests
-      run: npm audit
+  
